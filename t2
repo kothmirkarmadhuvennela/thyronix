@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vulnerability Scanner</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f4f8;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 30px auto;
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: #2457d6;
+            text-align: center;
+        }
+
+        p {
+            color: #555;
+            line-height: 1.6;
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 12px 0;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #2864e8;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #1748b5;
+        }
+
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+            background: #eef7ff;
+        }
+
+        .note {
+            font-size: 13px;
+            color: #777;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>🔍 Vulnerability Scanner</h1>
+
+        <p>
+            This mini project demonstrates a basic website security
+            checker. Enter a website URL to view basic security information.
+        </p>
+
+        <label for="website">Enter Website URL:</label>
+
+        <input
+            type="url"
+            id="website"
+            placeholder="https://example.com"
+            required
+        >
+
+        <button onclick="scanWebsite()">Scan Website</button>
+
+        <div id="result"></div>
+
+        <p class="note">
+            Note: This is a basic educational demo, not a real vulnerability
+            scanner. Only scan websites you own or have permission to test.
+        </p>
+
+    </div>
+
+    <script>
+        function scanWebsite() {
+            const website = document.getElementById("website").value.trim();
+            const result = document.getElementById("result");
+
+            if (!website) {
+                alert("Please enter a website URL.");
+                return;
+            }
+
+            let url;
+
+            try {
+                url = new URL(website);
+            } catch (error) {
+                alert("Please enter a valid website URL.");
+                return;
+            }
+
+            if (url.protocol !== "http:" && url.protocol !== "https:") {
+                alert("Please enter a valid HTTP or HTTPS URL.");
+                return;
+            }
+
+            result.style.display = "block";
+
+            result.innerHTML = `
+                <h3>📋 Scan Report</h3>
+                <p><b>Website:</b> ${escapeHTML(url.href)}</p>
+                <p><b>Connection:</b>
+                    ${url.protocol === "https:"
+                        ? "HTTPS is used."
+                        : "HTTP is used; the connection is not encrypted by HTTPS."}
+                </p>
+                <p><b>HTTPS Check:</b>
+                    ${url.protocol === "https:"
+                        ? "The URL uses HTTPS. Certificate validity has not been checked."
+                        : "HTTPS is not used in the entered URL."}
+                </p>
+                <p><b>Open Ports:</b> Not tested</p>
+                <p><b>Software Versions:</b> Not tested</p>
+                <p><b>Vulnerability Status:</b> A full security scan is required.</p>
+                <p><b>Recommendation:</b> Use HTTPS and perform an authorized
+                   security assessment to identify vulnerabilities.</p>
+            `;
+        }
+
+        function escapeHTML(text) {
+            const div = document.createElement("div");
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+
+</body>
+</html>
