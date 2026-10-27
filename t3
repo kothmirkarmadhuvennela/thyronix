@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Phishing Email Detection Model</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f4f8;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 650px;
+            margin: 30px auto;
+            padding: 25px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #285bd4;
+        }
+
+        .description {
+            color: #555;
+            line-height: 1.6;
+        }
+
+        label {
+            display: block;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+
+        input, textarea {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 12px;
+            margin-top: 8px;
+            border: 1px solid #ccc;
+            border-radius: 7px;
+            font-size: 15px;
+        }
+
+        textarea {
+            height: 150px;
+            resize: vertical;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            margin-top: 20px;
+            background: #2864e8;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 17px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #1748b5;
+        }
+
+        #result {
+            display: none;
+            margin-top: 25px;
+            padding: 18px;
+            border-radius: 8px;
+            line-height: 1.6;
+            overflow-wrap: anywhere;
+        }
+
+        .safe {
+            background: #d9fbe8;
+            color: #087443;
+        }
+
+        .phishing {
+            background: #ffe0e0;
+            color: #b42318;
+        }
+
+        .warning {
+            color: #777;
+            font-size: 13px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>📧 Phishing Email Detection</h1>
+
+        <p class="description">
+            This project checks email text for common phishing warning signs
+            and displays a preliminary result.
+        </p>
+
+        <label for="emailSubject">Email Subject:</label>
+
+        <input
+            type="text"
+            id="emailSubject"
+            placeholder="Enter email subject"
+        >
+
+        <label for="emailText">Email Message:</label>
+
+        <textarea
+            id="emailText"
+            placeholder="Paste the email message here..."
+        ></textarea>
+
+        <label for="emailURL">Website URL (optional):</label>
+
+        <input
+            type="text"
+            id="emailURL"
+            placeholder="https://example.com"
+        >
+
+        <button onclick="detectPhishing()">
+            Check Email
+        </button>
+
+        <div id="result" role="status" aria-live="polite"></div>
+
+        <p class="warning">
+            Educational demonstration only. This rule-based checker is not
+            a trained machine-learning model and cannot reliably determine
+            whether an email is safe. Do not open suspicious links.
+        </p>
+
+    </div>
+
+    <script>
+        function detectPhishing() {
+            const subject =
+                document.getElementById("emailSubject").value.trim();
+
+            const message =
+                document.getElementById("emailText").value.trim();
+
+            const website =
+                document.getElementById("emailURL").value.trim();
+
+            const result = document.getElementById("result");
+
+            if (!subject && !message && !website) {
+                alert("Please enter an email subject, message, or URL.");
+                return;
+            }
+
+            const text = (subject + " " + message).toLowerCase();
+
+            const suspiciousWords = [
+                "urgent",
+                "verify your account",
+                "password",
+                "click here",
+                "account suspended",
+                "claim your prize",
+                "won a prize",
+                "bank details",
+                "send otp",
+                "confirm your identity",
+                "limited time",
+                "update your payment"
+            ];
+
+            let score = 0;
+            let warnings = [];
+
+            suspiciousWords.forEach(function(word) {
+                if (text.includes(word)) {
+                    score++;
+                    warnings.push("Suspicious phrase: " + word);
+                }
+            });
+
+            if (website) {
+                if (/^https?:\/\//i.test(website)) {
+                    try {
+                        const url = new URL(website);
+
+                        if (url.protocol !== "https:") {
+                            score++;
+                            warnings.push(
+                                "The URL does not use HTTPS."
+                            );
+                        }
+
+                        if (url.username || url.password) {
+                            score++;
+                            warnings.push(
+                                "The URL contains unusual login information."
+                            );
+                        }
+
+                    } catch (error) {
+                        score++;
+                        warnings.push(
+                            "The entered URL is not valid."
+                        );
+                    }
+                } else {
+                    score++;
+                    warnings.push(
+                        "The URL does not begin with HTTP or HTTPS."
+                    );
+                }
+            }
+
+            if (score >= 2) {
+                result.className = "phishing";
+                result.innerHTML = `
+                    <h2>⚠️ Suspicious Email</h2>
+                    <p>The message contains multiple phishing warning signs.</p>
+                    <p><strong>Warning signs found:</strong></p>
+                    <ul id="warningList"></ul>
+                    <p>Do not click links or share passwords or OTPs.</p>
+                `;
+            } else if (score === 1) {
+                result.className = "phishing";
+                result.innerHTML = `
+                    <h2>⚠️ Needs Further Checking</h2>
+                    <p>One potential warning sign was detected.</p>
+                    <p><strong>Warning signs found:</strong></p>
+                    <ul id="warningList"></ul>
+                    <p>Verify the sender independently before taking action.</p>
+                `;
+            } else {
+                result.className = "safe";
+                result.innerHTML = `
+                    <h2>✅ No Common Warning Signs Detected</h2>
+                    <p>No suspicious phrases from this demo's limited
+                    checklist were found.</p>
+                    <p>This does not prove that the email is safe.</p>
+                `;
+            }
+
+            if (warnings.length > 0) {
+                const list = document.getElementById("warningList");
+
+                warnings.forEach(function(warning) {
+                    const item = document.createElement("li");
+                    item.textContent = warning;
+                    list.appendChild(item);
+                });
+            }
+
+            result.style.display = "block";
+        }
+    </script>
+
+</body>
+</html>
