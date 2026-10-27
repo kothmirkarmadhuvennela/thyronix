@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Login System</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f4f8;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 420px;
+            margin: 40px auto;
+            padding: 25px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #285bd4;
+        }
+
+        p {
+            color: #555;
+            line-height: 1.5;
+        }
+
+        label {
+            display: block;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 12px;
+            margin-top: 7px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 18px;
+            border: none;
+            border-radius: 6px;
+            background: #2864e8;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #1748b5;
+        }
+
+        .secondary {
+            background: #64748b;
+        }
+
+        #message {
+            margin-top: 15px;
+            font-weight: bold;
+            overflow-wrap: anywhere;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .note {
+            font-size: 12px;
+            color: #777;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>🔐 Secure Login System</h1>
+
+    <p>
+        Register an account or log in to explore this
+        secure-login interface demonstration.
+    </p>
+
+    <!-- Registration -->
+    <section id="registerSection">
+
+        <h2>Create Account</h2>
+
+        <form id="registerForm">
+
+            <label for="regUsername">Username</label>
+            <input
+                type="text"
+                id="regUsername"
+                minlength="3"
+                maxlength="30"
+                autocomplete="username"
+                required
+            >
+
+            <label for="regPassword">Password</label>
+            <input
+                type="password"
+                id="regPassword"
+                minlength="8"
+                autocomplete="new-password"
+                required
+            >
+
+            <button type="submit">Register</button>
+
+        </form>
+
+        <button class="secondary" onclick="showLogin()">
+            Already Registered? Login
+        </button>
+
+    </section>
+
+    <!-- Login -->
+    <section id="loginSection" class="hidden">
+
+        <h2>Login</h2>
+
+        <form id="loginForm">
+
+            <label for="loginUsername">Username</label>
+            <input
+                type="text"
+                id="loginUsername"
+                autocomplete="username"
+                required
+            >
+
+            <label for="loginPassword">Password</label>
+            <input
+                type="password"
+                id="loginPassword"
+                autocomplete="current-password"
+                required
+            >
+
+            <button type="submit">Login</button>
+
+        </form>
+
+        <button class="secondary" onclick="showRegister()">
+            Create New Account
+        </button>
+
+    </section>
+
+    <!-- Dashboard -->
+    <section id="dashboardSection" class="hidden">
+
+        <h2>Welcome!</h2>
+
+        <p id="welcomeMessage"></p>
+
+        <p>You have successfully logged in to this demo.</p>
+
+        <button onclick="logout()">Logout</button>
+
+    </section>
+
+    <p id="message" role="status" aria-live="polite"></p>
+
+    <p class="note">
+        Educational demo only. This version does not use a secure
+        backend, password hashing, or server-side sessions. Do not
+        enter real passwords or use it to protect real accounts.
+    </p>
+
+</div>
+
+<script>
+    // Demo-only account stored temporarily in this page's memory.
+    // A real application must store password hashes on a server.
+
+    let demoAccount = null;
+
+    function showMessage(text, color) {
+        const message = document.getElementById("message");
+        message.textContent = text;
+        message.style.color = color;
+    }
+
+    function showRegister() {
+        document.getElementById("registerSection").classList.remove("hidden");
+        document.getElementById("loginSection").classList.add("hidden");
+        document.getElementById("dashboardSection").classList.add("hidden");
+        showMessage("", "#333");
+    }
+
+    function showLogin() {
+        document.getElementById("registerSection").classList.add("hidden");
+        document.getElementById("loginSection").classList.remove("hidden");
+        document.getElementById("dashboardSection").classList.add("hidden");
+        showMessage("", "#333");
+    }
+
+    document.getElementById("registerForm").addEventListener(
+        "submit", function(event) {
+            event.preventDefault();
+
+            const username =
+                document.getElementById("regUsername").value.trim();
+
+            const password =
+                document.getElementById("regPassword").value;
+
+            if (!/^[a-zA-Z0-9_]{3,30}$/.test(username)) {
+                showMessage(
+                    "Use 3–30 letters, numbers, or underscores for the username.",
+                    "red"
+                );
+                return;
+            }
+
+            if (password.length < 8) {
+                showMessage(
+                    "Password must contain at least 8 characters.",
+                    "red"
+                );
+                return;
+            }
+
+            demoAccount = {
+                username: username,
+                password: password
+            };
+
+            document.getElementById("loginUsername").value = username;
+            document.getElementById("loginPassword").value = "";
+
+            showLogin();
+
+            showMessage(
+                "Demo registration successful! Please log in.",
+                "green"
+            );
+        }
+    );
+
+    document.getElementById("loginForm").addEventListener(
+        "submit", function(event) {
+            event.preventDefault();
+
+            const username =
+                document.getElementById("loginUsername").value.trim();
+
+            const password =
+                document.getElementById("loginPassword").value;
+
+            if (
+                demoAccount &&
+                username === demoAccount.username &&
+                password === demoAccount.password
+            ) {
+                document.getElementById("registerSection").classList.add("hidden");
+                document.getElementById("loginSection").classList.add("hidden");
+                document.getElementById("dashboardSection").classList.remove("hidden");
+
+                document.getElementById("welcomeMessage").textContent =
+                    "Hello, " + demoAccount.username + "!";
+
+                showMessage("Login successful!", "green");
+            } else {
+                showMessage(
+                    "Invalid username or password. Register first if needed.",
+                    "red"
+                );
+            }
+        }
+    );
+
+    function logout() {
+        document.getElementById("loginForm").reset();
+        showLogin();
+        showMessage("You have logged out.", "green");
+    }
+</script>
+
+</body>
+</html>
